@@ -29,7 +29,7 @@ void RK4(double* U, double* t, double dt, double c,double N,double h,int scheme)
         }
         //tl = ts + alpha[i]*dt;
 
-        solver(U,delta_u,dt,N,c,h);///coder ca doit modifier delta_u
+        solver(Ul,delta_u,dt,N,c,h);///coder ca doit modifier delta_u
 
         for(int j=0;j<N;j++){
             U[j] = U[j]+ gamma[i]*delta_u[j];
