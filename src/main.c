@@ -77,27 +77,42 @@ int main(int argc, char *argv[]){
     }
     printf("\n");
 
+    // Writing data //
+    FILE *file = fopen("data/results.txt", "w");
+    if (file == NULL) {
+        printf("Error opening file for writing\n");
+        return 1;
+    }
+    fprintf(file, "Grid configuration:\n");
+    fprintf(file, "N: %f, L: %f, h: %f, CFL: %f, dt: %f, nt: %f\n", N, L, h, CFL, dt, nt);
+    fprintf(file, "Initial condition (U points):\n");
+    for (int i = 0; i < N; i++) {
+        fprintf(file, "%f ", U[i]);
+    }
+    fprintf(file, "\n");
+
     // RK4 iteration //
     printf("#### Start of RK4 iteration #####\n");
     double t = 0;
     for(int i=0;i<=nt;i++){
         RK4(U,&t,dt,c,N,h,scheme_number);
-        printf("#### End of iteration: %i ####",i);
-        printf("t= %f\n",t);
-        printf("U points:");
-        for (int j = 0; j < N; j++){
-            printf("%f ",U[j]);
+        fprintf(file, "#### End of iteration: %i ####\n", i);
+        fprintf(file, "t= %f\n", t);
+        fprintf(file, "U points:\n");
+        for (int j = 0; j < N; j++) {
+            fprintf(file, "%f ", U[j]);
         }
-        printf("\n");
+        fprintf(file, "\n");
+      
     }
+    printf("#### RK4 iterations ended successfully ####");
 
-
+    fclose(file);
 
 
     free(U);
     free(x);
 
-    
-
+    return 0;
 
 }

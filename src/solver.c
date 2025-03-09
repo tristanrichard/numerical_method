@@ -12,8 +12,8 @@ void RK4(double* U, double* t, double dt, double c,double N,double h,int scheme)
     double *Us = (double *)malloc(N * sizeof(double));
     double *Ul = (double *)malloc(N * sizeof(double));
     double *delta_u = (double *)malloc(N * sizeof(double));
-    double ts;
-    double tl;
+    //double ts;
+    //double tl;//not use here since no dependence on t in f
 
     void (*solver)(double* ,double* ,double ,double ,double ,double) = choose_solver(scheme);
 
@@ -21,13 +21,13 @@ void RK4(double* U, double* t, double dt, double c,double N,double h,int scheme)
         Us[i]=U[i];
         delta_u[i]=0;
     }
-    ts=*t;
+    //ts=*t;
 
     for (int i = 0; i < 4; i++) {
         for(int j=0;j<N;j++){
             Ul[j] = Us[j] + alpha[i]*delta_u[j];
         }
-        tl = ts + alpha[i]*dt;
+        //tl = ts + alpha[i]*dt;
 
         solver(U,delta_u,dt,N,c,h);///coder ca doit modifier delta_u
 

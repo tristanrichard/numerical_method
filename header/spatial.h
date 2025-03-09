@@ -8,4 +8,8 @@ void E2(double* U,double* dU,double dt,double N,double c,double h);
 
 void E4(double* U,double* dU,double dt,double N,double c,double h);
 
+void I4(double* U,double* dU,double dt,double N,double c,double h);
+
+void ED(double* U,double* dU,double dt,double N,double c,double h);
+
 #endif
