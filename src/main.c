@@ -78,13 +78,15 @@ int main(int argc, char *argv[]){
     printf("\n");
 
     // Writing data //
-    FILE *file = fopen("data/results.txt", "w");
+    char filename[100];  
+    sprintf(filename, "data/results_%s_N%.0f.txt", argv[1],N);
+    FILE *file = fopen(filename, "w");
     if (file == NULL) {
         printf("Error opening file for writing\n");
         return 1;
     }
     fprintf(file, "Grid configuration:\n");
-    fprintf(file, "N: %f, L: %f, h: %f, CFL: %f, dt: %f, nt: %f\n", N, L, h, CFL, dt, nt);
+    fprintf(file, "N: %f, L: %f, h: %f, CFL: %f, dt: %f, nt: %f, c: %f, sigma: %f\n", N, L, h, CFL, dt, nt,c,sigma);
     fprintf(file, "Initial condition (U points):\n");
     for (int i = 0; i < N; i++) {
         fprintf(file, "%f ", U[i]);
