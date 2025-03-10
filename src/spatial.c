@@ -49,7 +49,7 @@ void I4(double* U,double* dU,double dt,double N,double c,double h){
 
 void ED(double* U,double* dU,double dt,double N,double c,double h){
     for(int i=0;i<N;i++){
-        dU[i] = -dt*c*((U[circ(i-2,N)] - (6*U[circ(i-1,N)] + (3*U[circ(i,N)] + (2*U[circ(i+1,N)]))))/(6*h));
+        dU[i] = -dt*c*((U[circ(i-2,N)] - (6*U[circ(i-1,N)]) + (3*U[circ(i,N)]) + (2*U[circ(i+1,N)]))/(6*h));
     }
 }
 
