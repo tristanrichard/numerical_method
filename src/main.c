@@ -26,12 +26,18 @@ int main(int argc, char *argv[]){
 
     //scheme attribution //
     int scheme_number = 0;
-    if(strcmp(argv[1],"E2")){
+    if(strcmp(argv[1],"E2")==0){
         scheme_number =1;
         printf("Scheme used is E2\n");
-    }else if(strcmp(argv[1],"E4")){
+    }else if(strcmp(argv[1],"E4")==0){
         scheme_number= 2;
         printf("Scheme used is E4\n");
+    }else if(strcmp(argv[1],"I4")==0){
+        scheme_number= 3;
+        printf("Scheme used is I4\n");
+    }else if(strcmp(argv[1],"ED")==0){
+        scheme_number= 4;
+        printf("Scheme used is ED\n");
     }else{
         printf("Scheme not supported, simulation stopped\n");
         return 1;

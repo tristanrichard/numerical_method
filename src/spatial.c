@@ -30,16 +30,16 @@ void E2(double* U,double* dU,double dt,double N,double c,double h){
 
 void E4(double* U,double* dU,double dt,double N,double c,double h){
     for(int i=0;i<N;i++){
-        double coef1 = (U[circ(i+1,N)]-U[circ(i-1,N)])*(4/3);
-        double coef2 = (U[circ(i+2,N)]-U[circ(i-2,N)])*(1/6);
+        double coef1 = (U[circ(i+1,N)]-U[circ(i-1,N)])*(4.0/3.0);
+        double coef2 = (U[circ(i+2,N)]-U[circ(i-2,N)])*(1.0/6.0);
         dU[i] = -dt*c*((coef1-coef2)/(2*h));
     }
 }
 
 void I4(double* U,double* dU,double dt,double N,double c,double h){
     double *q = (double *)malloc(N * sizeof(double));
-    double a = 3/2;
-    double alpha = 1/2;
+    double a = 3.0/2.0;
+    double alpha = 1.0/2.0;
     for(int i=0;i<N;i++){
         q[i] =-dt*c* a *((U[circ(i+1,N)]- U[circ(i-1,N)])/(2*h));
     }
