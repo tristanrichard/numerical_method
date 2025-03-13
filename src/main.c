@@ -49,7 +49,7 @@ int main(int argc, char *argv[]){
     double L =1;
     double sigma = L/16;
     double h = L/N;
-    double c = 1;
+    double c = 1.0;
     double *x = (double*)malloc(N * sizeof(double)); //xi
     double CFL = atof(argv[3]);
     double dt = (CFL*h)/c;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]){
         printf("Memory allocation failed\n");
         return 1;
     }
-    init_Gaussian(U,x,N,sigma);
+    init_Gaussian(U,x,N,sigma,L,c);
     printf("####Initialisation sucessfull#####\n");
     printf("U points:");
     for (int i = 0; i < N; i++){

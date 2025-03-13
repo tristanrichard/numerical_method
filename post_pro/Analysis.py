@@ -247,6 +247,55 @@ def plot_versus(U,t,grid_config,scheme):
     plt.tick_params(axis='both', labelsize=15)
     plt.savefig(f'../plot/versus_{scheme}_N{N}.png', dpi=300, bbox_inches='tight')
     plt.show()
+    
+    
+def plot_nonuniform(U_lst,grid_config_lst,sheme_lst):
+    N=128#je lis pas vrmt les données ici attention
+    L=1
+    dt=grid_config_lst["dt"]
+    nt=grid_config_lst["nt"]
+    x_uni = np.linspace(-L/2, L/2,int(N), endpoint=False)
+    x_Nuni = np.zeros(len(x_uni))
+    a=3/5
+    U_Nuni=[]
+    for i in range(len(x_uni)):
+        x_Nuni[i]= x_uni[i]- ((a*L)/(2*np.pi))*np.sin((2*np.pi*x_uni[i])/L)
+        
+    for i in range(len(sheme_lst)):
+        U_loc1=[]
+        for k in range(int(nt)):
+            U_loc=np.zeros(len(x_Nuni))
+            for j in range(len(x_uni)):
+                U_loc[j] = U_lst[i][k][j]* (1-a*np.cos((2*np.pi*x_uni[j])/L))
+            U_loc1.append(U_loc)
+        U_Nuni.append(U_loc1)
+    U_Nuni=np.array(U_Nuni)
+    index_05 = int(0.5/dt) +1
+    index_1 = int(1/dt) +1
+    
+    U_lst = np.concatenate((U_lst,U_lst),axis=2)
+    U_Nuni = np.concatenate((U_Nuni,U_Nuni),axis=2)
+    x_Nuni = np.linspace(-L/2, 3*L/2,2*int(N), endpoint=False)
+    x_uni = np.linspace(-L/2, 3*L/2,2*int(N), endpoint=False)
+    
+    for i in range(len(U_lst)):
+        plt.figure(figsize=(10, 8))
+        plt.plot(x_uni, U_lst[i][index_05], label=r'Numerical solution at $\frac{ct}{L}=0.5$', color='royalblue', linestyle='--', linewidth=2)
+        #plt.plot(x_Nuni, U_Nuni[i][index_05], label=r'Exact solution at $\frac{ct}{L}=0.5$', color='royalblue', linestyle='-', linewidth=2)
+        plt.plot(x_uni, U_lst[i][index_1], label=r'Numerical solution at $\frac{ct}{L}=1$', color='orangered', linestyle='--', linewidth=2)
+        #plt.plot(x_Nuni, U_Nuni[i][index_1], label=r'Exact solution at $\frac{ct}{L}=1$', color='orangered', linestyle='-', linewidth=2)
+
+
+        plt.xlabel(r'$\frac{x}{L}$', fontsize=25)
+        plt.ylabel(r'$\frac{u(x,t)}{U}$', fontsize=25)
+        #plt.legend(fontsize=12,loc='lower right', labelspacing=0.1)
+        #plt.ylim([-0.7,1])
+        plt.grid(True)
+        plt.tick_params(axis='both', labelsize=15)
+        scheme=sheme_lst[i]
+        plt.savefig(f'../plot/nonuniform_{scheme}_N{N}.png', dpi=300, bbox_inches='tight')
+        plt.show()
+        
 
 
 
@@ -315,6 +364,22 @@ if __name__ == '__main__':
     A = 1     
     #plot_versus(U_steps_ED_N128, time_steps_ED_N128, grid_config_ED_N128, "ED")
     
+    #### E2 128 non uniform####
+    grid_config_E2_N128_Nuni, time_steps_E2_N128_Nuni, U_steps_E2_N128_Nuni = extract_simulation_data("../data/results_E2_N128_nonuniform1.txt")
+
+    
+    #### E4 128 non uniform####
+    grid_config_E4_N128_Nuni, time_steps_E4_N128_Nuni, U_steps_E4_N128_Nuni = extract_simulation_data("../data/results_E4_N128_nonuniform1.txt")
+
+    
+    #### I4 128 non uniform####
+    grid_config_I4_N128_Nuni, time_steps_I4_N128_Nuni, U_steps_I4_N128_Nuni = extract_simulation_data("../data/results_I4_N128_nonuniform1.txt")
+
+    
+    #### ED 128 non uniform####
+    grid_config_ED_N128_Nuni, time_steps_ED_N128_Nuni, U_steps_ED_N128_Nuni = extract_simulation_data("../data/results_ED_N128_nonuniform1.txt")
+
+    
     
     A=1
     #plot_global_diagnostics(U_steps_E2_N32,U_steps_E2_N64,U_steps_E2_N128,time_steps_E2_N32,time_steps_E2_N64,time_steps_E2_N128, A,grid_config_E2_N32,grid_config_E2_N64,grid_config_E2_N128,"E2")
@@ -322,8 +387,11 @@ if __name__ == '__main__':
     #plot_global_diagnostics(U_steps_I4_N32,U_steps_I4_N64,U_steps_I4_N128,time_steps_I4_N32,time_steps_I4_N64,time_steps_I4_N128, A,grid_config_I4_N32,grid_config_I4_N64,grid_config_I4_N128,"I4")
     #plot_global_diagnostics(U_steps_ED_N32,U_steps_ED_N64,U_steps_ED_N128,time_steps_ED_N32,time_steps_ED_N64,time_steps_ED_N128, A,grid_config_ED_N32,grid_config_ED_N64,grid_config_ED_N128,"ED")
     
-    plot_convergence([U_steps_E2_N32,U_steps_E4_N32,U_steps_I4_N32,U_steps_ED_N32],[U_steps_E2_N64,U_steps_E4_N64,U_steps_I4_N64,U_steps_ED_N64],[U_steps_E2_N128,U_steps_E4_N128,U_steps_I4_N128,U_steps_ED_N128],[time_steps_E2_N32,time_steps_E4_N32,time_steps_I4_N32,time_steps_ED_N32],[time_steps_E2_N64,time_steps_E4_N64,time_steps_I4_N64,time_steps_ED_N64],[time_steps_E2_N128,time_steps_E4_N128,time_steps_I4_N128,time_steps_ED_N128], A,[grid_config_E2_N32,grid_config_E4_N32,grid_config_I4_N32,grid_config_ED_N32],[grid_config_E2_N64,grid_config_E4_N64,grid_config_I4_N64,grid_config_ED_N64],[grid_config_E2_N128,grid_config_E4_N128,grid_config_I4_N128,grid_config_ED_N128],["E2","E4","I4","ED"])
-
+    #plot_convergence([U_steps_E2_N32,U_steps_E4_N32,U_steps_I4_N32,U_steps_ED_N32],[U_steps_E2_N64,U_steps_E4_N64,U_steps_I4_N64,U_steps_ED_N64],[U_steps_E2_N128,U_steps_E4_N128,U_steps_I4_N128,U_steps_ED_N128],[time_steps_E2_N32,time_steps_E4_N32,time_steps_I4_N32,time_steps_ED_N32],[time_steps_E2_N64,time_steps_E4_N64,time_steps_I4_N64,time_steps_ED_N64],[time_steps_E2_N128,time_steps_E4_N128,time_steps_I4_N128,time_steps_ED_N128], A,[grid_config_E2_N32,grid_config_E4_N32,grid_config_I4_N32,grid_config_ED_N32],[grid_config_E2_N64,grid_config_E4_N64,grid_config_I4_N64,grid_config_ED_N64],[grid_config_E2_N128,grid_config_E4_N128,grid_config_I4_N128,grid_config_ED_N128],["E2","E4","I4","ED"])
+    plot_nonuniform([U_steps_E2_N128_Nuni,U_steps_E4_N128_Nuni,U_steps_I4_N128_Nuni,U_steps_ED_N128_Nuni],grid_config_ED_N128_Nuni,["E2","E4","I4","ED"])
+    
+    
+    
 
     
 
