@@ -255,18 +255,16 @@ def plot_nonuniform(U_lst,grid_config_lst,sheme_lst):
     dt=grid_config_lst["dt"]
     nt=grid_config_lst["nt"]
     x_uni = np.linspace(-L/2, L/2,int(N), endpoint=False)
-    x_Nuni = np.zeros(len(x_uni))
     a=3/5
     U_Nuni=[]
-    for i in range(len(x_uni)):
-        x_Nuni[i]= x_uni[i]- ((a*L)/(2*np.pi))*np.sin((2*np.pi*x_uni[i])/L)
+
         
     for i in range(len(sheme_lst)):
         U_loc1=[]
         for k in range(int(nt)):
-            U_loc=np.zeros(len(x_Nuni))
+            U_loc=np.zeros(len(x_uni))
             for j in range(len(x_uni)):
-                U_loc[j] = U_lst[i][k][j] *(1/(1-a*np.cos((2*np.pi*x_uni[j])/L)))
+                U_loc[j] = U_lst[i][k][j] * (1/(1-a*np.cos((2*np.pi*x_uni[j])/L)))
             U_loc1.append(U_loc)
         U_Nuni.append(U_loc1)
     U_Nuni=np.array(U_Nuni)
@@ -275,8 +273,10 @@ def plot_nonuniform(U_lst,grid_config_lst,sheme_lst):
     
     U_lst = np.concatenate((U_lst,U_lst),axis=2)
     U_Nuni = np.concatenate((U_Nuni,U_Nuni),axis=2)
-    x_Nuni = np.linspace(-L/2, 3*L/2,2*int(N), endpoint=False)
     x_uni = np.linspace(-L/2, 3*L/2,2*int(N), endpoint=False)
+    x_Nuni = np.zeros(len(x_uni))
+    for i in range(len(x_uni)):
+        x_Nuni[i]= x_uni[i] - (((a*L)/(2*np.pi))*np.sin((2*np.pi*x_uni[i])/L))
     
     for i in range(len(U_lst)):
         plt.figure(figsize=(10, 8))
