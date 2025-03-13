@@ -266,7 +266,7 @@ def plot_nonuniform(U_lst,grid_config_lst,sheme_lst):
         for k in range(int(nt)):
             U_loc=np.zeros(len(x_Nuni))
             for j in range(len(x_uni)):
-                U_loc[j] = U_lst[i][k][j]* (1-a*np.cos((2*np.pi*x_uni[j])/L))
+                U_loc[j] = U_lst[i][k][j] *(1/(1-a*np.cos((2*np.pi*x_uni[j])/L)))
             U_loc1.append(U_loc)
         U_Nuni.append(U_loc1)
     U_Nuni=np.array(U_Nuni)
@@ -281,9 +281,9 @@ def plot_nonuniform(U_lst,grid_config_lst,sheme_lst):
     for i in range(len(U_lst)):
         plt.figure(figsize=(10, 8))
         plt.plot(x_uni, U_lst[i][index_05], label=r'Numerical solution at $\frac{ct}{L}=0.5$', color='royalblue', linestyle='--', linewidth=2)
-        #plt.plot(x_Nuni, U_Nuni[i][index_05], label=r'Exact solution at $\frac{ct}{L}=0.5$', color='royalblue', linestyle='-', linewidth=2)
+        plt.plot(x_Nuni, U_Nuni[i][index_05], label=r'Exact solution at $\frac{ct}{L}=0.5$', color='royalblue', linestyle='-', linewidth=2)
         plt.plot(x_uni, U_lst[i][index_1], label=r'Numerical solution at $\frac{ct}{L}=1$', color='orangered', linestyle='--', linewidth=2)
-        #plt.plot(x_Nuni, U_Nuni[i][index_1], label=r'Exact solution at $\frac{ct}{L}=1$', color='orangered', linestyle='-', linewidth=2)
+        plt.plot(x_Nuni, U_Nuni[i][index_1], label=r'Exact solution at $\frac{ct}{L}=1$', color='orangered', linestyle='-', linewidth=2)
 
 
         plt.xlabel(r'$\frac{x}{L}$', fontsize=25)

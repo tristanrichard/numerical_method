@@ -91,7 +91,7 @@ int main(int argc, char *argv[]){
         printf("Memory allocation failed\n");
         return 1;
     }
-    init_Gaussian(U,x,N,sigma,L,c);
+    init_Gaussian(U,x,N,sigma,L,c,atoi(argv[5]));
     printf("####Initialisation sucessfull#####\n");
     printf("U points:");
     for (int i = 0; i < N; i++){
