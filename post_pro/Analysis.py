@@ -58,29 +58,139 @@ def diagnosis(U,h,A,sigma,t,x,c,L):
     return I,E,R
     
     
-def plot_global_diagnostics(U, h, A, sigma, t, c, L,N,config):
-    x = np.linspace(-L/2, L/2,int(N), endpoint=False)
-    I, E, R = diagnosis(U, h, A, sigma, t, x, c,L)
-    ctL = (c * t) / L
+def plot_global_diagnostics(U_32, U_64, U_128, t_32, t_64, t_128, A, config_32, config_64, config_128, scheme):
+    # Calcul des coordonnées spatiales
+    x_32 = np.linspace(-config_32["L"]/2, config_32["L"]/2, int(config_32["N"]), endpoint=False)
+    x_64 = np.linspace(-config_64["L"]/2, config_64["L"]/2, int(config_64["N"]), endpoint=False)
+    x_128 = np.linspace(-config_128["L"]/2, config_128["L"]/2, int(config_128["N"]), endpoint=False)
 
-    plt.figure(figsize=(8, 6))
+    # Calcul des diagnostics
+    I_32, E_32, R_32 = diagnosis(U_32, config_32["h"], A, config_32["sigma"], t_32, x_32, config_32["c"], config_32["L"])
+    I_64, E_64, R_64 = diagnosis(U_64, config_64["h"], A, config_64["sigma"], t_64, x_64, config_64["c"], config_64["L"])
+    I_128, E_128, R_128 = diagnosis(U_128, config_128["h"], A, config_128["sigma"], t_128, x_128, config_128["c"], config_128["L"])
 
-    plt.plot(ctL, I, label=r'$I_n^h$', linestyle='-', color='blue')
-    plt.plot(ctL, E, label=r'$E_n^h$', linestyle='--', color='black')
-    plt.plot(ctL, R, label=r'$R_n^h$', linestyle='-.', color="green")
-    
-    # Labels and title
-    plt.xlabel(r'$ct / L$', fontsize=14)
-    plt.ylabel('Diagnostics', fontsize=14)
-    plt.title(f'Evolution of Global Diagnostics {config}', fontsize=16)
-    plt.legend(fontsize=12)
-    
-    # Grid and styling
-    plt.grid(True, linestyle='--', alpha=0.6)
-    
-    # Show the figure
+    # Normalisation du temps
+    ctL_32 = (config_32["c"] * t_32) / config_32["L"]
+    ctL_64 = (config_64["c"] * t_64) / config_64["L"]
+    ctL_128 = (config_128["c"] * t_128) / config_128["L"]
+
+    # Création de la figure avec 3 sous-graphiques
+    fig, ax = plt.subplots(3, 1, figsize=(8, 8), sharex=True)
+
+    # Liste des diagnostics
+    diagnostics = [("I", I_32, I_64, I_128, 'black', [1.7, 1.8], "lower right"),
+                   ("E", E_32, E_64, E_128, 'blue', [0.8,1.3], "lower left"),
+                   ("R", R_32, R_64, R_128, 'brown', [0, 0.9], "upper left")]
+
+    for i, (diag_name, diag_32, diag_64, diag_128, color, ylim, loc) in enumerate(diagnostics):
+        ax[i].plot(ctL_32, diag_32, label=r'N = 32pt', linestyle='solid', color=color)
+        ax[i].plot(ctL_64, diag_64, label=r'N = 64pt', linestyle='dashdot', color=color)
+        ax[i].plot(ctL_128, diag_128, label=r'N = 128pt', linestyle='dotted', color=color)
+
+        ax[i].set_ylabel(rf'${diag_name}^{{n}}_{{h}}$', fontsize=20)
+        ax[i].legend(fontsize=13, loc=loc)
+        ax[i].set_xlim([0, 1])
+        ax[i].set_ylim(ylim)
+        ax[i].grid(True)
+        ax[i].tick_params(axis='both', labelsize=14)
+
+    # Ajouter le label commun de l'axe x
+    ax[2].set_xlabel(r'$\frac{ct}{L}$', fontsize=20)
+
+    # Ajustement automatique pour éviter le chevauchement
+    plt.tight_layout()
+
+    # Sauvegarde et affichage
+    plt.savefig(f'../plot/diagnosis_combined_{scheme}.png', dpi=300, bbox_inches='tight')
     plt.show()
     
+def plot_convergence(U_32, U_64, U_128, t_32, t_64, t_128, A, config_32, config_64, config_128, schemes):
+    x_32 = []
+    x_64 = []
+    x_128 = []
+    R_32 = []
+    R_64 = []
+    R_128 = []
+
+    # Loop over the schemes
+    for i in range(len(U_32)):
+        # Calculate the spatial coordinates for each resolution
+        x_32.append(np.linspace(-config_32[i]["L"]/2, config_32[i]["L"]/2, int(config_32[i]["N"]), endpoint=False))
+        x_64.append(np.linspace(-config_64[i]["L"]/2, config_64[i]["L"]/2, int(config_64[i]["N"]), endpoint=False))
+        x_128.append(np.linspace(-config_128[i]["L"]/2, config_128[i]["L"]/2, int(config_128[i]["N"]), endpoint=False))
+        
+        # Compute diagnostics
+        I_32, E_32, R_32_all = diagnosis(U_32[i], config_32[i]["h"], A, config_32[i]["sigma"], t_32[i], x_32[i], config_32[i]["c"], config_32[i]["L"])
+        I_64, E_64, R_64_all = diagnosis(U_64[i], config_64[i]["h"], A, config_64[i]["sigma"], t_64[i], x_64[i], config_64[i]["c"], config_64[i]["L"])
+        I_128, E_128, R_128_all = diagnosis(U_128[i], config_128[i]["h"], A, config_128[i]["sigma"], t_128[i], x_128[i], config_128[i]["c"], config_128[i]["L"])
+        
+        # Find the relevant time step index for each resolution
+        index1 = int(1/config_32[i]["dt"]) + 1
+        R_32.append(R_32_all[index1])
+        
+        index2 = int(1/config_64[i]["dt"]) + 1
+        R_64.append(R_64_all[index2])
+        
+        index3 = int(1/config_128[i]["dt"]) + 1
+        R_128.append(R_128_all[index3])
+
+    # Define the colors
+    color = ['black', 'darkgreen', 'darkorange', 'darkblue']
+    
+    # Plotting the global error (R) for each scheme
+    plt.figure(figsize=(8, 6))  # Set figure size
+    
+    ax = plt.gca()  # Get current axes
+    
+    for i, scheme in enumerate(schemes):
+        ax.loglog([1/8, 1/4, 1/2], 
+                  [R_128[i], R_64[i], R_32[i]], 
+                  marker='o', 
+                  label=f'{scheme}', 
+                  linestyle='-', 
+                  markersize=8,
+                  color=color[i])
+    
+    # Set labels for x and y axes with appropriate font sizes
+    ax.set_xlabel(r'$\frac{h}{\sigma}$', fontsize=25)
+    ax.set_ylabel(r'$R^{n}_{h}$', fontsize=25)
+    
+    # Set legend with a smaller font size
+    ax.legend(fontsize=12)
+    
+    # Set the ticks for the x-axis and y-axis and adjust their font size
+    plt.tick_params(axis='both', labelsize=15)
+    
+    # Customize the grid: Make it grid lines more visible and style them nicely
+    ax.grid(True, which='both', linestyle='--', linewidth=0.7, color='grey')
+    
+    # Set x-axis ticks and labels (customizing the fractions for readability)
+    ax.set_xticks([1/8, 1/4, 1/2])  # Define x-ticks
+    ax.set_xticklabels([r'$\frac{1}{8}$', r'$\frac{1}{4}$', r'$\frac{1}{2}$'], fontsize=15)
+    
+    # Save the plot as a PNG image with tight bounding box for better layout
+    plt.tight_layout()
+    plt.savefig('../plot/convergence.png', dpi=300, bbox_inches='tight')
+    
+    # Display the plot
+    plt.show()
+    
+    order_E2 = np.log(np.sqrt(R_32[0]/R_128[0]))/np.log(4)
+    print(f"order of E2 is {order_E2}")
+        
+    order_E4 = np.log(np.sqrt(R_32[1]/R_128[1]))/np.log(4)
+    print(f"order of E4 is {order_E4}")
+    
+    order_I4 = np.log(np.sqrt(R_32[2]/R_128[2]))/np.log(4)
+    print(f"order of I4 is {order_I4}")
+    
+    order_ED = np.log(np.sqrt(R_32[3]/R_128[3]))/np.log(4)
+    print(f"order of ED is {order_ED}")
+
+      
+
+    
+        
 
 def anim(x,U_steps,L,time_steps):
     ###### Animation ######
@@ -146,26 +256,74 @@ if __name__ == '__main__':
     grid_config_E2_N32, time_steps_E2_N32, U_steps_E2_N32 = extract_simulation_data("../data/results_E2_N32.txt")
     # anim(x, U_steps, L, time_steps)
     A = 1  # Attention si on modifie le code   
-    #plot_global_diagnostics(U_steps_E2_N32, grid_config_E2_N32["h"], A, grid_config_E2_N32["sigma"], time_steps_E2_N32, grid_config_E2_N32["c"], grid_config_E2_N32["L"], grid_config_E2_N32["N"], "E2_N32")
-    plot_versus(U_steps_E2_N32, time_steps_E2_N32, grid_config_E2_N32, "E2")
+    #plot_versus(U_steps_E2_N32, time_steps_E2_N32, grid_config_E2_N32, "E2")
     
     #### E4 32####
     grid_config_E4_N32, time_steps_E4_N32, U_steps_E4_N32 = extract_simulation_data("../data/results_E4_N32.txt")
     A = 1   
-    # plot_global_diagnostics(U_steps_E4_N32, grid_config_E4_N32["h"], A, grid_config_E4_N32["sigma"], time_steps_E4_N32, grid_config_E4_N32["c"], grid_config_E4_N32["L"], grid_config_E4_N32["N"], "E4_N32")
-    plot_versus(U_steps_E4_N32, time_steps_E4_N32, grid_config_E4_N32, "E4")
+    #plot_versus(U_steps_E4_N32, time_steps_E4_N32, grid_config_E4_N32, "E4")
     
     #### I4 32####
     grid_config_I4_N32, time_steps_I4_N32, U_steps_I4_N32 = extract_simulation_data("../data/results_I4_N32.txt")
     A = 1    
-    # plot_global_diagnostics(U_steps_I4_N32, grid_config_I4_N32["h"], A, grid_config_I4_N32["sigma"], time_steps_I4_N32, grid_config_I4_N32["c"], grid_config_I4_N32["L"], grid_config_I4_N32["N"], "I4_N32")
-    plot_versus(U_steps_I4_N32, time_steps_I4_N32, grid_config_I4_N32, "I4")
+    #plot_versus(U_steps_I4_N32, time_steps_I4_N32, grid_config_I4_N32, "I4")
     
     #### ED 32####
     grid_config_ED_N32, time_steps_ED_N32, U_steps_ED_N32 = extract_simulation_data("../data/results_ED_N32.txt")
     A = 1     
-    # plot_global_diagnostics(U_steps_ED_N32, grid_config_ED_N32["h"], A, grid_config_ED_N32["sigma"], time_steps_ED_N32, grid_config_ED_N32["c"], grid_config_ED_N32["L"], grid_config_ED_N32["N"], "ED_N32")
-    plot_versus(U_steps_ED_N32, time_steps_ED_N32, grid_config_ED_N32, "ED")
+    #plot_versus(U_steps_ED_N32, time_steps_ED_N32, grid_config_ED_N32, "ED")
+    
+    #### E2 64 ####
+    grid_config_E2_N64, time_steps_E2_N64, U_steps_E2_N64 = extract_simulation_data("../data/results_E2_N64.txt")
+    # anim(x, U_steps, L, time_steps)
+    A = 1  # Attention si on modifie le code   
+    #plot_versus(U_steps_E2_N64, time_steps_E2_N64, grid_config_E2_N64, "E2")
+    
+    #### E4 64 ####
+    grid_config_E4_N64, time_steps_E4_N64, U_steps_E4_N64 = extract_simulation_data("../data/results_E4_N64.txt")
+    A = 1   
+    #plot_versus(U_steps_E4_N64, time_steps_E4_N64, grid_config_E4_N64, "E4")
+    
+    #### I4 64 ####
+    grid_config_I4_N64, time_steps_I4_N64, U_steps_I4_N64 = extract_simulation_data("../data/results_I4_N64.txt")
+    A = 1    
+    #plot_versus(U_steps_I4_N64, time_steps_I4_N64, grid_config_I4_N64, "I4")
+    
+    #### ED 64 ####
+    grid_config_ED_N64, time_steps_ED_N64, U_steps_ED_N64 = extract_simulation_data("../data/results_ED_N64.txt")
+    A = 1     
+    #plot_versus(U_steps_ED_N64, time_steps_ED_N64, grid_config_ED_N64, "ED")
+    
+    #### E2 128 ####
+    grid_config_E2_N128, time_steps_E2_N128, U_steps_E2_N128 = extract_simulation_data("../data/results_E2_N128.txt")
+    # anim(x, U_steps, L, time_steps)
+    A = 1  # Attention si on modifie le code   
+    #plot_versus(U_steps_E2_N128, time_steps_E2_N128, grid_config_E2_N128, "E2")
+    
+    #### E4 128 ####
+    grid_config_E4_N128, time_steps_E4_N128, U_steps_E4_N128 = extract_simulation_data("../data/results_E4_N128.txt")
+    A = 1   
+    #plot_versus(U_steps_E4_N128, time_steps_E4_N128, grid_config_E4_N128, "E4")
+    
+    #### I4 128 ####
+    grid_config_I4_N128, time_steps_I4_N128, U_steps_I4_N128 = extract_simulation_data("../data/results_I4_N128.txt")
+    A = 1    
+    #plot_versus(U_steps_I4_N128, time_steps_I4_N128, grid_config_I4_N128, "I4")
+    
+    #### ED 128 ####
+    grid_config_ED_N128, time_steps_ED_N128, U_steps_ED_N128 = extract_simulation_data("../data/results_ED_N128.txt")
+    A = 1     
+    #plot_versus(U_steps_ED_N128, time_steps_ED_N128, grid_config_ED_N128, "ED")
+    
+    
+    A=1
+    #plot_global_diagnostics(U_steps_E2_N32,U_steps_E2_N64,U_steps_E2_N128,time_steps_E2_N32,time_steps_E2_N64,time_steps_E2_N128, A,grid_config_E2_N32,grid_config_E2_N64,grid_config_E2_N128,"E2")
+    #plot_global_diagnostics(U_steps_E4_N32,U_steps_E4_N64,U_steps_E4_N128,time_steps_E4_N32,time_steps_E4_N64,time_steps_E4_N128, A,grid_config_E4_N32,grid_config_E4_N64,grid_config_E4_N128,"E4")
+    #plot_global_diagnostics(U_steps_I4_N32,U_steps_I4_N64,U_steps_I4_N128,time_steps_I4_N32,time_steps_I4_N64,time_steps_I4_N128, A,grid_config_I4_N32,grid_config_I4_N64,grid_config_I4_N128,"I4")
+    #plot_global_diagnostics(U_steps_ED_N32,U_steps_ED_N64,U_steps_ED_N128,time_steps_ED_N32,time_steps_ED_N64,time_steps_ED_N128, A,grid_config_ED_N32,grid_config_ED_N64,grid_config_ED_N128,"ED")
+    
+    plot_convergence([U_steps_E2_N32,U_steps_E4_N32,U_steps_I4_N32,U_steps_ED_N32],[U_steps_E2_N64,U_steps_E4_N64,U_steps_I4_N64,U_steps_ED_N64],[U_steps_E2_N128,U_steps_E4_N128,U_steps_I4_N128,U_steps_ED_N128],[time_steps_E2_N32,time_steps_E4_N32,time_steps_I4_N32,time_steps_ED_N32],[time_steps_E2_N64,time_steps_E4_N64,time_steps_I4_N64,time_steps_ED_N64],[time_steps_E2_N128,time_steps_E4_N128,time_steps_I4_N128,time_steps_ED_N128], A,[grid_config_E2_N32,grid_config_E4_N32,grid_config_I4_N32,grid_config_ED_N32],[grid_config_E2_N64,grid_config_E4_N64,grid_config_I4_N64,grid_config_ED_N64],[grid_config_E2_N128,grid_config_E4_N128,grid_config_I4_N128,grid_config_ED_N128],["E2","E4","I4","ED"])
+
 
     
 

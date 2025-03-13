@@ -13,10 +13,11 @@ int main(int argc, char *argv[]){
  * @param2 N = Number of grid points
  * @param3 CFL = CFL number 
  * @param4 nt = number of time steps
+ * @param5 no_uniform si =1
  * 
  * @return 0 of OK
  */
-    if(argc == 5){
+    if(argc == 6){
         printf("\n ######################## \n");
         printf("Numerical simulation has started\n");
     }else{
@@ -53,6 +54,7 @@ int main(int argc, char *argv[]){
     double CFL = atof(argv[3]);
     double dt = (CFL*h)/c;
     double nt = atof(argv[4]);
+
     if (x == NULL) {
         printf("Memory allocation failed\n");
         return 1;
@@ -60,6 +62,20 @@ int main(int argc, char *argv[]){
     for (int i = 0; i < N; i++) {
         x[i] = -L/2 + i * h;  // Calcul des positions xi
     }
+
+    //allocation of the convection speed//
+    double *b = (double*)malloc(N * sizeof(double));
+    if(atof(argv[5])==1){//non uniform case
+        for(int i=0;i<N;i++){
+            double a = 3.0/5.0;
+            b[i]=c/(1-a*cos(2*M_PI*(x[i]/L)));
+        }
+    }else{
+        for(int i=0;i<N;i++){
+            b[i]=c;
+        }
+    }
+
     printf("####### Grid configuration#######\n");
     printf("Number of grid points : %f\n",N);
     printf("Length of the domain: %f\n",L);
@@ -85,7 +101,7 @@ int main(int argc, char *argv[]){
 
     // Writing data //
     char filename[100];  
-    sprintf(filename, "data/results_%s_N%.0f.txt", argv[1],N);
+    sprintf(filename, "data/results_%s_N%.0f_nonuniform%.0f.txt", argv[1],N,atof(argv[5]));
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         printf("Error opening file for writing\n");
@@ -103,7 +119,7 @@ int main(int argc, char *argv[]){
     printf("#### Start of RK4 iteration #####\n");
     double t = 0;
     for(int i=0;i<=nt;i++){
-        RK4(U,&t,dt,c,N,h,scheme_number);
+        RK4(U,&t,dt,b,N,h,scheme_number);
         fprintf(file, "#### End of iteration: %i ####\n", i);
         fprintf(file, "t= %f\n", t);
         fprintf(file, "U points:\n");
@@ -120,6 +136,7 @@ int main(int argc, char *argv[]){
 
     free(U);
     free(x);
+    free(b);
 
     return 0;
 

@@ -6,7 +6,7 @@
 
 
 
-void RK4(double* U, double* t, double dt, double c,double N,double h,int scheme) {
+void RK4(double* U, double* t, double dt, double* c,double N,double h,int scheme) {
     double alpha[4] = {0.0, 0.5, 0.5, 1.0};
     double gamma[4] = {1.0 / 6.0, 1.0 / 3.0, 1.0 / 3.0, 1.0 / 6.0};
     double *Us = (double *)malloc(N * sizeof(double));
@@ -15,7 +15,7 @@ void RK4(double* U, double* t, double dt, double c,double N,double h,int scheme)
     //double ts;
     //double tl;//not use here since no dependence on t in f
 
-    void (*solver)(double* ,double* ,double ,double ,double ,double) = choose_solver(scheme);
+    void (*solver)(double* ,double* ,double ,double ,double* ,double) = choose_solver(scheme);
 
     for(int i=0;i<N;i++){
         Us[i]=U[i];
