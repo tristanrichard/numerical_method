@@ -14,10 +14,11 @@ int main(int argc, char *argv[]){
  * @param3 CFL = CFL number 
  * @param4 nt = number of time steps
  * @param5 no_uniform si =1
+ * @param6 wavepacket si =1
  * 
  * @return 0 of OK
  */
-    if(argc == 6){
+    if(argc == 7){
         printf("\n ######################## \n");
         printf("Numerical simulation has started\n");
     }else{
@@ -91,7 +92,12 @@ int main(int argc, char *argv[]){
         printf("Memory allocation failed\n");
         return 1;
     }
-    init_Gaussian(U,x,N,sigma,L,c,atoi(argv[5]));
+
+    if(atof(argv[6])==1){
+        init_Wavepacket(U,x,N,sigma,L,c,atoi(argv[5]));
+    }else{
+        init_Gaussian(U,x,N,sigma,L,c,atoi(argv[5]));
+    }
     printf("####Initialisation sucessfull#####\n");
     printf("U points:");
     for (int i = 0; i < N; i++){
@@ -101,7 +107,7 @@ int main(int argc, char *argv[]){
 
     // Writing data //
     char filename[100];  
-    sprintf(filename, "data/results_%s_N%.0f_nonuniform%.0f.txt", argv[1],N,atof(argv[5]));
+    sprintf(filename, "data/results_%s_N%.0f_nonuniform%.0f_wave%.0f.txt", argv[1],N,atof(argv[5]),atof(argv[6]));
     FILE *file = fopen(filename, "w");
     if (file == NULL) {
         printf("Error opening file for writing\n");
